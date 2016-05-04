@@ -10,29 +10,27 @@ import de.vf.logichelper.Vector2;
 import de.vf.logichelper.Vector3;
 
 public class Gobject {    
-    public List<Point> outerEdgePoints;
-    private List<Point> outerEdgePointsUntouched;
-    public List<Point> selected; // only for debugging purposes
+    public List<Point> outerEdgePoints;        
     public List<Edge> edges; // all the edges of this object //RAW
     public List<Quad> quads;
+    public boolean notComputeable;
     
     public Gobject() {               
-        outerEdgePoints = new ArrayList<Point>();       
-        selected = new ArrayList<Point>();
+        outerEdgePoints = new ArrayList<Point>();               
         edges = new ArrayList<Edge>();
         quads = new ArrayList<Quad>();
-        
+        notComputeable = false;
     }       
     
     public void addEdge(Edge e) {
         edges.add(e);
     }    
     
-    public void computeOuterEdge() {                
-        System.out.println("Edges: " + edges.size());        
+    public void computeOuterEdge() {                        
         ArrayList<Edge> sortedEdges = new ArrayList<Edge>();
         sortedEdges.add(edges.get(0));
         edges.remove(0);
+        int previousSize = 1;
         while(!edges.isEmpty()) {
             Edge pre = sortedEdges.get(sortedEdges.size() - 1); //get last one of list      
             
@@ -43,9 +41,14 @@ public class Gobject {
                     sortedEdges.add(current);
                     break;
                 }
-            }            
-        }
-        System.out.println("sorted!");
+            }  
+            if (edges.size() == previousSize) {
+                System.err.println("Found model with hole!");
+                notComputeable = true;
+                return;
+            }
+            previousSize = edges.size();
+        }        
         
         
         Edge first = sortedEdges.get(0);
@@ -73,24 +76,18 @@ public class Gobject {
 
         if (outerEdgePoints.get(0).equals(outerEdgePoints.get(outerEdgePoints.size() - 1))) {
             outerEdgePoints.remove(outerEdgePoints.size() - 1);
-        }
-        outerEdgePointsUntouched = new ArrayList<Point>(outerEdgePoints);
-        System.out.println("Corners: " + outerEdgePoints.size());           
+        }                    
     }
         
     
-    public void quadify() {
-        int lastTime = 2;
-        while (outerEdgePoints.size() != 0) {
-            if (outerEdgePoints.size() == lastTime) {
-                System.err.println("model got a hole");
-                return;
-            }
-            lastTime = outerEdgePoints.size();
-            selected = new ArrayList<Point>();
+    public void quadify() {   
+        if (notComputeable) {
+            return;
+        }
+        while (outerEdgePoints.size() != 0) {                        
             cutEar();
         }
-        System.out.println("created " + quads.size() + " quads");
+        System.out.println("created model with " + quads.size() + " quads");
     }
     
     public void cutEar() {
@@ -104,32 +101,25 @@ public class Gobject {
                 Point d = ps_b.equals(b) ? ps_d : ps_b;                                                                              
                 
                 if (outerEdgePoints.get(mod((i - 2), outerEdgePoints.size())).equals(d) 
-                        || outerEdgePoints.get(mod((i + 2), outerEdgePoints.size())).equals(d)) {
-                    // is pickel quad
-                    System.out.println("d already existed => is pickel");                        
-                    //remove all 4                                                 
+                        || outerEdgePoints.get(mod((i + 2), outerEdgePoints.size())).equals(d)) {                                              
                     outerEdgePoints.remove(a);
                     outerEdgePoints.remove(b);
                     outerEdgePoints.remove(c);
                     outerEdgePoints.remove(d);
-                } else {                         
-                    System.out.println("is reduceable");
+                } else {                                             
                     outerEdgePoints.add(i, d);
                     outerEdgePoints.remove(a);
                     outerEdgePoints.remove(b);
                     outerEdgePoints.remove(c);                                                                       
                 }                    
                 addQuad(a, b, c, d);
-                //System.out.println("breaking");
                 break;
             }                
         }
-        //System.out.println("remaining: " + outerEdgePoints.size());
     }
     
     public void addQuad(Point a, Point b, Point c, Point d) {        
-        Quad q = new Quad(a, b, c, d);
-        System.out.println(q.toString());
+        Quad q = new Quad(a, b, c, d);        
         quads.add(q);
     }
     
@@ -147,15 +137,7 @@ public class Gobject {
     public boolean triangleIsValid(Point a, Point b, Point c) {        
         if (!upDown(a, b, c)) {
             return false; //triangle is not in gobject
-        }
-        
-        
-//        for (int i = 0; i < outerEdgePoints.size(); i++) {
-//            Point p = outerEdgePoints.get(i);
-//            if (pointInTriangle(a, b, c, p)) {
-//                return false; // a point is the triangle so stop
-//            }
-//        }
+        }                
         
         //test if a quad would be possible
         
@@ -196,8 +178,7 @@ public class Gobject {
         if ((p.x == ax || p.x == cx) && (p.y == ay || p.y == cy)) { //exclude cornerpoints 
             return false;
         }
-        boolean result = ax <= p.x && cx >= p.x && p.y >= ay && p.y <= cy; 
-        System.out.println(result);
+        boolean result = ax <= p.x && cx >= p.x && p.y >= ay && p.y <= cy;         
         return result;
     }
     
@@ -227,22 +208,9 @@ public class Gobject {
     public boolean upDown(Point a, Point b, Point c) {                   
         Point ba = new Point(a.x - b.x, a.y - b.y);
         Point bc = new Point(c.x - b.x, c.y - b.y);
-        boolean tt = !crossp(ba, bc);
-        if (!(isRemainingPolygonClockwise() ^ tt)) {
-            System.err.println("CLOCKWISE DOES NOT ALIGN");
-        }
+        boolean tt = !crossp(ba, bc);        
         return tt;
-    }
-    
-    public boolean isRemainingPolygonClockwise() {
-        int sum = 0;
-        for (int i = 0; i < outerEdgePoints.size() - 1; i++) {
-            Point n = outerEdgePoints.get(i + 1);
-            Point c = outerEdgePoints.get(i);
-            sum += (n.x - c.x) * (n.y + c.y);
-        }
-        return sum > 0;
-    }
+    }       
         
     public boolean crossp(Point a, Point b) {
         return (a.x * b.y - a.y * b.x) > 0;
@@ -254,11 +222,7 @@ public class Gobject {
             Point cp = outerEdgePoints.get(i);                        
             g.fillRect(cp.x - 3, cp.y - 3, 7, 7);                       
         }
-        g.setColor(new Color(250, 0, 0));
-        for (int i = 0; i < selected.size(); i++) {
-            Point cp = selected.get(i);  
-            g.fillRect(cp.x - 3, cp.y - 3, 7,7);
-        }        
+        g.setColor(new Color(250, 0, 0));        
         
         //all quads
         for (int i = 0; i < quads.size(); i++) {            

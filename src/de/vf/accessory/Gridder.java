@@ -37,13 +37,14 @@ public class Gridder extends JPanel {
                 cells[i][j] = new Cell(i * dimen, j * dimen, (i + 1) * dimen, (j + 1) * dimen, gonc);
             }
         }                        
-        drawCanvas(); 
+        drawCanvas();         
         //readField();
-        updateCorners();        
-        for (int i = 0; i < gobjs.size(); i++) {
-            gobjs.get(i).computeOuterEdge();            
+        updateCorners();                
+        for (int i = 0; i < gobjs.size(); i++) {            
+            gobjs.get(i).computeOuterEdge();               
+            gobjs.get(i).quadify();            
         }
-        gobjc = 0;
+        gobjc = 0;        
         repaint();
     }
     
@@ -199,7 +200,7 @@ public class Gridder extends JPanel {
     
     public void readField() {
         
-        String in = "524515n787443n933875n933490n932912n15888n7680n69439n499583n523903n405534n262172n262156n264576n401280n138240n245766n245766n98332n56";
+        String in = "245816n245817n522243n16259n16359n14591n4111n6n1798n896n192n224n524736n917505n1040385n524033n425920n248956n519196n457752";
         String[] rows = in.split("n");
         for (int i = 0; i < rows.length; i++) {
             int thisRow = Integer.valueOf(rows[i]);

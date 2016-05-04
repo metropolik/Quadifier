@@ -15,7 +15,7 @@ public class Quad {
         this.d = d;
     }
     public void paint(Graphics2D g) {          
-        g.setColor(new Color(0, 60, 0));
+        g.setColor(new Color(100, 250, 50));
         Stroke oldStroke = g.getStroke();
         g.setStroke(new BasicStroke(3));
         drawLine(g, a, b);
