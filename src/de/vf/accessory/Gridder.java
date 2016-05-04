@@ -37,7 +37,8 @@ public class Gridder extends JPanel {
                 cells[i][j] = new Cell(i * dimen, j * dimen, (i + 1) * dimen, (j + 1) * dimen, gonc);
             }
         }                        
-        drawCanvas();    
+        drawCanvas(); 
+        //readField();
         updateCorners();        
         for (int i = 0; i < gobjs.size(); i++) {
             gobjs.get(i).computeOuterEdge();            
@@ -167,27 +168,49 @@ public class Gridder extends JPanel {
         canvas = new BufferedImage(wh, wh, BufferedImage.TYPE_INT_RGB);
         OpenSimplexNoise noise = new OpenSimplexNoise(System.currentTimeMillis());
         
-        for (int i = 0; i < wh; i++) {
+        for (int i = 0; i < wh; i++) {            
             for (int j = 0; j < wh; j++) {
                 double value = noise.eval( (double) i / fs, (double) j / fs, 0.0);                
                 int rgb = 0x010101 * (int)((value + 1) * 127.5);
-                canvas.setRGB(i, j, rgb);
+                canvas.setRGB(i, j, rgb);                
             }
+            
         }        
         
+        String totalPattern = "";
         for (int i = 0; i < cells.length; i++) {
+            int row = 0;
             for (int j = 0; j < cells.length; j++) {
                 double value = noise.eval( cells[i][j].centerX() / fs, cells[i][j].centerY() / fs, 0.0);
                 cells[i][j] = new Cell(i * dimen, j * dimen, (i + 1) * dimen, (j + 1) * dimen, gonc);
                 if (value > 0.15) {
                     cells[i][j].setStatus(16);
+                    row = row | (1 << j);
+                } else {
+                    cells[i][j].setStatus(0);                    
+                }
+            }
+            totalPattern += String.valueOf(row) + "n";
+            
+        }        
+        System.out.println(totalPattern.subSequence(0, totalPattern.length() - 1));
+        repaint();
+    }
+    
+    public void readField() {
+        
+        String in = "524515n787443n933875n933490n932912n15888n7680n69439n499583n523903n405534n262172n262156n264576n401280n138240n245766n245766n98332n56";
+        String[] rows = in.split("n");
+        for (int i = 0; i < rows.length; i++) {
+            int thisRow = Integer.valueOf(rows[i]);
+            for (int j = 0; j < cells.length; j++) {
+                if (((thisRow >> j) & 1) != 0) {
+                    cells[i][j].setStatus(16);                    
                 } else {
                     cells[i][j].setStatus(0);                    
                 }
             }
         }
-        
-        repaint();
     }
     
     public void paintComponent(Graphics g) {

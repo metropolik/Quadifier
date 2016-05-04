@@ -90,7 +90,7 @@ public class Gui {
         sl_panel.putConstraint(SpringLayout.WEST, panel_2, 0, SpringLayout.WEST, panel);
         sl_panel.putConstraint(SpringLayout.SOUTH, panel_2, 0, SpringLayout.SOUTH, panel);
         sl_panel.putConstraint(SpringLayout.EAST, panel_2, -100, SpringLayout.EAST, panel);        
-        panel_2.setBackground(Color.CYAN);
+        panel_2.setBackground(new Color(51, 51, 51));
         panel.add(panel_2);
         
         try {

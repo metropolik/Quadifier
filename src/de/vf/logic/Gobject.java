@@ -159,8 +159,8 @@ public class Gobject {
         
         //test if a quad would be possible
         
-        for (int i = 0; i < outerEdgePointsUntouched.size(); i++) {
-            Point p = outerEdgePointsUntouched.get(i);
+        for (int i = 0; i < outerEdgePoints.size(); i++) {
+            Point p = outerEdgePoints.get(i);
             if (pointInQuad(a, c, p)) {
                 return false; // a point is the quad so stop
             }
@@ -187,13 +187,18 @@ public class Gobject {
     }
     
     //takes corner point a and b of a quad to see if p is in the quad
-    public boolean pointInQuad(Point a, Point c, Point p) {
+    //returns false for all 4 corner points themself
+    public boolean pointInQuad(Point a, Point c, Point p) {        
         int ax = a.x < c.x ? a.x : c.x;
         int cx = a.x < c.x ? c.x : a.x;
         int ay = a.y < c.y ? a.y : c.y;
-        int cy = a.y < c.y ? c.y : a.y;
-        return p.x > ax && p.x < cx
-                && p.y > ay && p.y < cy;
+        int cy = a.y < c.y ? c.y : a.y;        
+        if ((p.x == ax || p.x == cx) && (p.y == ay || p.y == cy)) { //exclude cornerpoints 
+            return false;
+        }
+        boolean result = ax <= p.x && cx >= p.x && p.y >= ay && p.y <= cy; 
+        System.out.println(result);
+        return result;
     }
     
     public Vector3 barycentric(Point a, Point b, Point c, Point p) {
