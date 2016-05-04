@@ -10,7 +10,7 @@ import de.vf.logichelper.Vector2;
 import de.vf.logichelper.Vector3;
 
 public class Gobject {    
-    private List<Point> outerEdgePoints;
+    public List<Point> outerEdgePoints;
     private List<Point> outerEdgePointsUntouched;
     public List<Point> selected; // only for debugging purposes
     public List<Edge> edges; // all the edges of this object //RAW
@@ -83,49 +83,53 @@ public class Gobject {
         int lastTime = 2;
         while (outerEdgePoints.size() != 0) {
             if (outerEdgePoints.size() == lastTime) {
-                System.err.println("model got a whole");
+                System.err.println("model got a hole");
                 return;
             }
             lastTime = outerEdgePoints.size();
             selected = new ArrayList<Point>();
-            for (int i = 0; i < outerEdgePoints.size(); i++) {               
-                Point a = outerEdgePoints.get(mod((i - 1), outerEdgePoints.size()));
-                Point b = outerEdgePoints.get(i);
-                Point c = outerEdgePoints.get(mod((i + 1), outerEdgePoints.size()));                               
-                if (triangleIsValid(a, b, c)) {                    
-                    Point ps_b = new Point(a.x, c.y);
-                    Point ps_d = new Point(c.x, a.y);
-                    Point d = ps_b.equals(b) ? ps_d : ps_b;                                                                              
-                    
-                    if (outerEdgePoints.get(mod((i - 2), outerEdgePoints.size())).equals(d) 
-                            || outerEdgePoints.get(mod((i + 2), outerEdgePoints.size())).equals(d)) {
-                        // is pickel quad
-                        //System.out.println("d already existed => is pickel");                        
-                        //remove all 4                                                 
-                        outerEdgePoints.remove(a);
-                        outerEdgePoints.remove(b);
-                        outerEdgePoints.remove(c);
-                        outerEdgePoints.remove(d);
-                    } else {                         
-                        //System.out.println("is reduceable");
-                        outerEdgePoints.add(i, d);
-                        outerEdgePoints.remove(a);
-                        outerEdgePoints.remove(b);
-                        outerEdgePoints.remove(c);                                                                       
-                    }                    
-                    addQuad(a, b, c, d);
-                    //System.out.println("breaking");
-                    break;
-                }                
-            }
-            //System.out.println("remaining: " + outerEdgePoints.size());
+            cutEar();
         }
         System.out.println("created " + quads.size() + " quads");
     }
     
+    public void cutEar() {
+        for (int i = 0; i < outerEdgePoints.size(); i++) {               
+            Point a = outerEdgePoints.get(mod((i - 1), outerEdgePoints.size()));
+            Point b = outerEdgePoints.get(i);
+            Point c = outerEdgePoints.get(mod((i + 1), outerEdgePoints.size()));                               
+            if (triangleIsValid(a, b, c)) {                    
+                Point ps_b = new Point(a.x, c.y);
+                Point ps_d = new Point(c.x, a.y);
+                Point d = ps_b.equals(b) ? ps_d : ps_b;                                                                              
+                
+                if (outerEdgePoints.get(mod((i - 2), outerEdgePoints.size())).equals(d) 
+                        || outerEdgePoints.get(mod((i + 2), outerEdgePoints.size())).equals(d)) {
+                    // is pickel quad
+                    System.out.println("d already existed => is pickel");                        
+                    //remove all 4                                                 
+                    outerEdgePoints.remove(a);
+                    outerEdgePoints.remove(b);
+                    outerEdgePoints.remove(c);
+                    outerEdgePoints.remove(d);
+                } else {                         
+                    System.out.println("is reduceable");
+                    outerEdgePoints.add(i, d);
+                    outerEdgePoints.remove(a);
+                    outerEdgePoints.remove(b);
+                    outerEdgePoints.remove(c);                                                                       
+                }                    
+                addQuad(a, b, c, d);
+                //System.out.println("breaking");
+                break;
+            }                
+        }
+        //System.out.println("remaining: " + outerEdgePoints.size());
+    }
+    
     public void addQuad(Point a, Point b, Point c, Point d) {        
         Quad q = new Quad(a, b, c, d);
-        //System.out.println(q.toString());
+        System.out.println(q.toString());
         quads.add(q);
     }
     

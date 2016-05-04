@@ -61,6 +61,14 @@ public class Gridder extends JPanel {
         
     }       
     
+    public void cutEar() {
+        gobjs.get(gobjc).cutEar();
+        repaint();
+        if (gobjs.get(gobjc).outerEdgePoints.size() == 0) {
+            gobjc++;
+        }
+    }
+    
     public void quadify() {
         gobjs.get(gobjc).quadify();
         gobjc++;

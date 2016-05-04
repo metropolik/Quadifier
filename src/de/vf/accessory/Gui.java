@@ -69,6 +69,15 @@ public class Gui {
         sl_panel.putConstraint(SpringLayout.WEST, panel_1, 0, SpringLayout.EAST, panel_2);
         sl_panel.putConstraint(SpringLayout.SOUTH, panel_1, 0, SpringLayout.SOUTH, panel);
         
+        JButton btnNewButton_2 = new JButton("Cut Ear");
+        btnNewButton_2.addActionListener( new ActionListener() {            
+            @Override
+            public void actionPerformed(ActionEvent e) {                
+                panel_2.cutEar();                                      
+            }
+        });
+        panel_1.add(btnNewButton_2);
+        
         JButton btnNewButton_3 = new JButton("Quadify");
         btnNewButton_3.addActionListener( new ActionListener() {            
             @Override
