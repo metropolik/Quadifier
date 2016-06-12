@@ -150,24 +150,6 @@ public class Gobject {
         return true;        
     }
     
-    public boolean pointAlreadyExists(Point p) {
-        int count = 0;
-        for (int i = 0; i < outerEdgePoints.size(); i++) {
-            if (outerEdgePoints.get(i).equals(p)) {
-                count++;
-                if (count >= 2) { // one is the point itself and one is the other
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-    
-    public boolean pointInTriangle(Point a, Point b, Point c, Point p) {
-        Vector3 r = barycentric(a, b, c, p);
-        return (r.getY() >= 0.0 && r.getZ() >= 0 && (r.getY() + r.getZ()) <= 1.0);
-    }
-    
     //takes corner point a and b of a quad to see if p is in the quad
     //returns false for all 4 corner points themself
     public boolean pointInQuad(Point a, Point c, Point p) {        
@@ -180,23 +162,7 @@ public class Gobject {
         }
         boolean result = ax <= p.x && cx >= p.x && p.y >= ay && p.y <= cy;         
         return result;
-    }
-    
-    public Vector3 barycentric(Point a, Point b, Point c, Point p) {
-        Vector2 v0 = new Vector2(b).sub(new Vector2(a));
-        Vector2 v1 = new Vector2(c).sub(new Vector2(a));
-        Vector2 v2 = new Vector2(p).sub(new Vector2(a));
-        float d00 = v0.dot(v0);
-        float d01 = v0.dot(v1);
-        float d11 = v1.dot(v1);
-        float d20 = v2.dot(v0);
-        float d21 = v2.dot(v1);
-        float denom = d00 * d11 - d01 * d01;
-        float v = (d11 * d20 - d01 * d21) / denom;
-        float w = (d00 * d21 - d01 * d20) / denom;
-        float u = 1.0f - v - w;
-        return new Vector3(u, v, w);
-    }           
+    }     
            
     
     /**
